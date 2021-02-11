@@ -21,6 +21,7 @@
     "passport-local": "^1.0.0",
     "pug": "^3.0.0"
   },
+  "proxy": "https://userapplicon.herokuapp.com/",
   "repository": {
     "type": "git",
     "url": "https://glitch.com/#!/project/welcome-project"
