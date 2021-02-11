@@ -7,7 +7,7 @@ const session = require('express-session');
 const passport = require('passport');
 const ObjectID = require('mongodb').ObjectID
 const LocalStrategy = require('passport-local').Strategy;
-
+const bcrypt = require('bcrypt');
 const app = express();
 
 //datbase
@@ -52,7 +52,8 @@ myDB(async client => {
       title: 'Connected to Database',
       message: 'Please login',    
       showLogin: true,
-      showRegistration: true
+      showRegistration: true,
+      showSocialAuth: true
     });
   });
 
@@ -94,21 +95,43 @@ myDB(async client => {
   });
 
   passport.use(new LocalStrategy(
-    function(username, password, done) {
+    function (username, password, done) {
       myDataBase.findOne({ username: username }, function (err, user) {
-        console.log('User '+ username +' attempted to log in.');
         if (err) { return done(err); }
         if (!user) { return done(null, false); }
-        if (password !== user.password) { return done(null, false); }
+        if (!bcrypt.compareSync(password, user.password)) { 
+          return done(null, false);
+        }
         return done(null, user);
       });
     }
   ));
 
 
- 
-
-
+  app.route('/register').post(
+    (req, res, next) => {
+      const hash = bcrypt.hashSync(req.body.password, 12);
+      myDataBase.findOne({ username: req.body.username }, function (err, user) {
+        if (err) {
+          next(err);
+        } else if (user) {
+          res.redirect('/');
+        } else {
+          myDataBase.insertOne({ username: req.body.username, password: hash }, (err, doc) => {
+            if (err) {
+              res.redirect('/');
+            } else {
+              next(null, doc.ops[0]);
+            }
+          });
+        }
+      });
+    },
+    passport.authenticate('local', { failureRedirect: '/' }),
+    (req, res, next) => {
+      res.redirect('/profile');
+    }
+  );
 
   // Be sure to add this...
 }).catch(e => {
