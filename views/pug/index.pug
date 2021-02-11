@@ -12,10 +12,11 @@ html
     | Looks like this page is being rendered from Pug into HTML!
     | #{title}
     p#pug-variable=message
+
+  
     
-    
-    
-    if showLogin
+    <!--  if showLogin-->
+  
       hr
       h2.center Login Form
       form(action='/login', method='post').center
@@ -28,7 +29,8 @@ html
         div
           input(type='submit', value='Log In')
           
-    if showRegistration
+    
+    <!--if showRegistration-->
       hr
       h2.center Registration Form
       form(action='/register', method='post').center
